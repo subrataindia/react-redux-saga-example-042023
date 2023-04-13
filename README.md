@@ -61,6 +61,27 @@ ReactDOM.render(
 );
 ```
 
+- For React 18
+
+```js
+import React from "react";
+import { Provider } from "react-redux";
+import App from "./App";
+import store from "./store";
+import { createRoot } from "react-dom/client";
+
+const rootElement = document.getElementById("root");
+const root = createRoot(rootElement);
+
+root.render(
+  <Provider store={store}>
+    <App />
+  </Provider>
+);
+```
+
+Here, we import `Provider` from `react-redux` and wrap the `App` component with it, passing in the `store` as a prop.
+
 ## Step 3: actions.js
 
 - This file contains all the redux actions
@@ -84,6 +105,8 @@ export const fetchDataFailure = (error) => ({
   payload: error,
 });
 ```
+
+Here, we define three action types `FETCH_DATA_REQUEST`, `FETCH_DATA_SUCCESS`, and `FETCH_DATA_FAILURE`, and three action creators `fetchDataRequest`, `fetchDataSuccess`, and `fetchDataFailure`. These actions will be dispatched by our Saga to fetch data from the API.
 
 ## Step 4:  reducers.js
 
@@ -122,4 +145,152 @@ const reducer = (state = initialState, action) => {
 
 export default reducer;
 ```
+
+or
+
+```js
+import produce from "immer";
+import {
+  FETCH_DATA_REQUEST,
+  FETCH_DATA_SUCCESS,
+  FETCH_DATA_FAILURE
+} from "./actions";
+
+const initialState = {
+  data: [],
+  loading: false,
+  error: null
+};
+
+export default function rootReducer(state = initialState, action) {
+  switch (action.type) {
+    case FETCH_DATA_REQUEST:
+      return produce(state, (draftState) => {
+        draftState.loading = true;
+        draftState.error = null;
+      });
+    case FETCH_DATA_SUCCESS:
+      return produce(state, (draftState) => {
+        draftState.loading = false;
+        draftState.data = action.payload;
+      });
+    case FETCH_DATA_FAILURE:
+      return produce(state, (draftState) => {
+        draftState.loading = false;
+        draftState.error = action.payload;
+      });
+    default:
+      return state;
+  }
+}
+```
+
+Here, we import the `produce` function from the `immer` library and the FETCH_DATA_REQUEST, FETCH_DATA_SUCCESS, and FETCH_DATA_FAILURE actions from ./actions.
+
+We define an initial state object with three properties: users, loading, and error.
+
+We then define the rootReducer function, which takes the state and action arguments and returns a new state object based on the action type.
+
+For the FETCH_DATA_REQUEST action, we use produce to update the loading property to true and reset the error property to null.
+
+For the FETCH_DATA_SUCCESS action, we use produce to update the loading property to false and replace the users property with the payload property of the action.
+
+For the FETCH_DATA_FAILURE action, we use produce to update the loading property to false and set the error property to the payload property of the action.
+
+For any other action type, we simply return the current state.
+
+The produce function from the immer library allows us to write our reducer logic in a mutable way, and automatically produces a new immutable state object that we can return. This makes it easier to write clean, readable code that is less error-prone than manually managing immutability.
+
+## Step 5: sagas.js
+
+```js
+import { put, call, takeLatest } from 'redux-saga/effects';
+import { fetchDataSuccess, fetchDataFailure, FETCH_DATA_REQUEST } from './actions';
+
+function* fetchData() {
+  try {
+    const response = yield call(fetch, 'https://jsonplaceholder.typicode.com/users');
+    const data = yield response.json();
+    yield put(fetchDataSuccess(data));
+  } catch (error) {
+    yield put(fetchDataFailure(error));
+  }
+}
+
+export default function* rootSaga() {
+  yield takeLatest(FETCH_DATA_REQUEST, fetchData);
+}
+```
+
+Here, we import put, call, and takeLatest from redux-saga/effects, and import the fetchDataSuccess, fetchDataFailure, and FETCH_DATA_REQUEST actions from ./actions.
+
+We define a generator function fetchData that uses call to fetch data from the API, and then dispatches either fetchDataSuccess or fetchDataFailure actions using put, depending on whether the API call succeeds or fails.
+
+We then define the rootSaga generator function that listens for FETCH_DATA_REQUEST actions using takeLatest, and runs the fetchData function whenever it receives one.
+
+That's it! With these files in place, your React app should now be able to fetch and display data from the API using Redux Saga.
+
+
+## Step 6: App.js
+
+```js
+import React from "react";
+import { useDispatch } from "react-redux";
+import { fetchDataRequest } from "./actions";
+import UserList from "./UserList";
+
+function App() {
+  const dispatch = useDispatch();
+
+  React.useEffect(() => {
+    dispatch(fetchDataRequest());
+  }, [dispatch]);
+
+  return (
+    <div className="App">
+      <UserList />
+    </div>
+  );
+}
+
+export default App;
+```
+
+Here, we import useDispatch from react-redux and the fetchDataRequest action from ./actions.
+
+We use useEffect to dispatch the fetchDataRequest action when the component mounts, and then render the UserList component.
+
+Next, we'll create the UserList.js file:
+
+## Step 7: UserList.js
+
+```js
+import React from "react";
+import { useSelector } from "react-redux";
+
+function UserList() {
+  const users = useSelector((state) => state.data);
+
+  return (
+    <div>
+      <h1>User List</h1>
+      <ul>
+        {users.map((user) => (
+          <li key={user.id}>{user.name}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default UserList;
+```
+
+Here, we import useSelector from react-redux and select the users array from the Redux store.
+
+We then render the list of users in an unordered list using the map method.
+
+That's it! With these files in place, your React app should now be able to fetch and display the list of users from the API using Redux Saga.
+
+
 
