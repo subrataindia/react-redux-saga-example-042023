@@ -5,7 +5,7 @@ Redux Saga is a middleware library that provides an easy and effective way to ha
 We'll assume that you have already installed Redux and React-Redux in your project. If not, you can install them by running the following command:
 
 ```js
-npm install redux react-redux
+npm install redux react-redux redux-saga immer
 ```
 
 Let's get started by creating the following files in your project:
