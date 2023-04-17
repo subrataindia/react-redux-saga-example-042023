@@ -90,6 +90,7 @@ Here, we import `Provider` from `react-redux` and wrap the `App` component with 
 export const FETCH_DATA_REQUEST = 'FETCH_DATA_REQUEST';
 export const FETCH_DATA_SUCCESS = 'FETCH_DATA_SUCCESS';
 export const FETCH_DATA_FAILURE = 'FETCH_DATA_FAILURE';
+// The above three lines can be moved to a separate file called constants.js
 
 export const fetchDataRequest = () => ({
   type: FETCH_DATA_REQUEST,
