@@ -292,5 +292,12 @@ We then render the list of users in an unordered list using the map method.
 
 That's it! With these files in place, your React app should now be able to fetch and display the list of users from the API using Redux Saga.
 
+## Extra clerifications
 
+### Difference between takeEvery and takeLatest
+
+- takeEvery allows concurrent actions to be handled. For example, the user clicks on a Load User button 2 consecutive times at a rapid rate, the 2nd click will dispatch a USER_REQUESTED action while the fetchUser fired on the first one hasn't yet terminated.
+takeEvery doesn't handle out of order responses from tasks. There is no guarantee that the tasks will terminate in the same order they were started. To handle out of order responses, you may consider takeLatest.
+
+- takeLatest instead start a new fetchUser task on each dispatched USER_REQUESTED action. Since takeLatest cancels any pending task started previously, we ensure that if a user triggers multiple consecutive USER_REQUESTED actions rapidly, we'll only conclude with the latest action
 
