@@ -301,3 +301,6 @@ takeEvery doesn't handle out of order responses from tasks. There is no guarante
 
 - takeLatest instead start a new fetchUser task on each dispatched USER_REQUESTED action. Since takeLatest cancels any pending task started previously, we ensure that if a user triggers multiple consecutive USER_REQUESTED actions rapidly, we'll only conclude with the latest action
 
+### What is the difference between put and call ?
+
+Both call() and put() are effect creator functions. call() function is used to create effect description, which instructs middleware to call the promise. put() function creates an effect, which instructs middleware to dispatch an action to the store.
